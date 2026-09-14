@@ -1,0 +1,17 @@
+{
+  "name": "waggy-frontend",
+  "version": "17.4.0",
+  "private": true,
+  "description": "Waggy / Wagtopia reference workbench. Presentation only. Talks to Waggy over HTTP.",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:isolation": "node --test tests/isolation.test.mjs tests/api-client.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
