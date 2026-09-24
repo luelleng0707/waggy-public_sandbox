@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Independent static host for waggy-frontend.
- * Injects WAGGY_API_BASE_URL into /src/api/runtime-config.js.
- * No secrets. Default API URL is a local development value only.
+ * Serves src/api/runtime-config.js (production API base) unless
+ * WAGGY_API_BASE_URL or VITE_WAGGY_API_BASE_URL is set.
+ * No secrets.
  */
 import fs from "node:fs";
 import http from "node:http";
@@ -11,9 +12,10 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = Number(process.env.PORT || 5173);
-const apiBase = String(
-  process.env.WAGGY_API_BASE_URL || process.env.VITE_WAGGY_API_BASE_URL || "http://localhost:8000"
+const apiBaseFromEnv = String(
+  process.env.WAGGY_API_BASE_URL || process.env.VITE_WAGGY_API_BASE_URL || ""
 ).replace(/\/$/, "");
+const WORKBENCH_PATHS = new Set(["/demo", "/classic", "/business", "/developer", "/data-hub"]);
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -37,9 +39,10 @@ function safeJoin(base, requestPath) {
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
-  if (url.pathname === "/src/api/runtime-config.js") {
+  if (url.pathname === "/src/api/runtime-config.js" && apiBaseFromEnv) {
     const body =
-      "window.__WAGGY_API_BASE_URL__ = " + JSON.stringify(apiBase) + ";\n";
+      "globalThis.__WAGGY_API_BASE_URL__ = " + JSON.stringify(apiBaseFromEnv) + ";\n" +
+      "window.__WAGGY_API_BASE_URL__ = globalThis.__WAGGY_API_BASE_URL__;\n";
     res.writeHead(200, {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "no-store",
@@ -58,7 +61,10 @@ const server = http.createServer((req, res) => {
       return;
     }
   }
-  let filePath = safeJoin(root, url.pathname === "/" ? "/index.html" : url.pathname);
+  const pagePath = url.pathname === "/" || WORKBENCH_PATHS.has(url.pathname)
+    ? "/index.html"
+    : url.pathname;
+  let filePath = safeJoin(root, pagePath);
   if (!filePath) {
     res.writeHead(400);
     res.end("bad path");
@@ -108,5 +114,5 @@ if (process.argv.includes("--check")) {
 
 server.listen(port, "127.0.0.1", () => {
   console.log("waggy-frontend http://127.0.0.1:" + port);
-  console.log("Waggy API " + apiBase);
+  console.log("Waggy API " + (apiBaseFromEnv || "src/api/runtime-config.js"));
 });

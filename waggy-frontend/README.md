@@ -26,7 +26,7 @@ It talks to Waggy through `src/api/client.js`. It does not calculate nutrients, 
 ## Run independently
 
 1. Copy `waggy-frontend/` to a new folder.
-2. Start a Waggy API, or set `WAGGY_API_BASE_URL`.
+2. The default API base is the verified production API in `src/api/runtime-config.js`. Set `WAGGY_API_BASE_URL` only to override it.
 3. From this directory:
 
 ```bash
@@ -44,14 +44,14 @@ Google Fonts are loaded from a public CDN for the existing visual language. The 
 Override the API:
 
 ```bash
-# environment (used by the static server)
-set WAGGY_API_BASE_URL=http://localhost:8000
+# optional override (used by the static server)
+set WAGGY_API_BASE_URL=https://waggy-production.up.railway.app
 
 # or query parameter
-http://127.0.0.1:5173/?api=http://localhost:8000
+http://127.0.0.1:5173/?api=https://waggy-production.up.railway.app
 ```
 
-When this UI is served by the Waggy API itself, it uses the same origin and does not need `WAGGY_API_BASE_URL`.
+When unset, `src/api/runtime-config.js` points at `https://waggy-production.up.railway.app`. Same-origin is only the last fallback if no base is configured.
 
 ## Environment
 
@@ -59,7 +59,7 @@ Public browser config only:
 
 | Name | Required | Secret? |
 |---|---|---|
-| `WAGGY_API_BASE_URL` | only when hosted separately from the API | no |
+| `WAGGY_API_BASE_URL` | optional override of runtime-config.js | no |
 | `VITE_WAGGY_API_BASE_URL` | optional Vite alias of the same value | no |
 
 Do **not** put Gemini keys, `API_KEYS`, database URLs, or access tokens in this project.

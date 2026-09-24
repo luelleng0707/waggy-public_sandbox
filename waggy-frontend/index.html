@@ -26,6 +26,7 @@
       <button type="button" class="wb-role" data-role="developer">Developer</button>
     </nav>
     <div class="wb-tools">
+      <button type="button" class="wb-ghost" id="open-data-hub">Connect Your Data</button>
       <button type="button" class="wb-ghost" id="module-load-demo">Load Demo Dog</button>
       <button type="button" class="wb-primary" id="module-analyze">Run Analysis</button>
       <a class="wb-link" data-waggy-api-link="/docs" href="/docs" target="_blank" rel="noreferrer">Docs</a>
@@ -38,6 +39,10 @@
   <div class="wb-error" id="workbench-error" hidden role="alert"></div>
   <p class="wb-status" id="workbench-status" hidden></p>
   <pre id="recalculation-facts" class="wb-json" hidden></pre>
+
+  <section id="b2b-app" class="b2b-app" hidden>
+    <p><button type="button" class="wb-ghost" id="close-data-hub">Back to workbench</button></p>
+  </section>
 
   <div class="wb-layout">
     <aside class="wb-intake" id="intake-panel">
@@ -78,7 +83,10 @@
           <h3 class="wb-intake-heading">Care history</h3>
           <p class="wb-help">Groomer observations are observations, not diagnoses. User preferences are not scientific facts. AI explanations are not evidence.</p>
           <p id="active-preferences" class="wb-muted">No saved dog.</p>
-          <ul id="care-history-list" class="wb-history"></ul>
+          <p id="evidence-report-link" hidden>
+            <a id="evidence-report-anchor" data-dog-id="" href="" target="_blank" rel="noreferrer">Evidence report</a>
+          </p>
+          <ul id="care-history-list" class="wb-history" data-dog-id=""></ul>
         </div>
         <div id="groomer-fields" hidden>
           <h3 class="wb-intake-heading">Observations</h3>

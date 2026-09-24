@@ -3,12 +3,14 @@
  *
  * Resolution order:
  * 1. ?api= query parameter
- * 2. window.__WAGGY_API_BASE_URL__ (injected by the independent static server)
+ * 2. globalThis.__WAGGY_API_BASE_URL__ (runtime-config.js, or serve.mjs when env is set)
  * 3. import.meta.env.VITE_WAGGY_API_BASE_URL when a bundler defines it
  * 4. <meta name="waggy-api-base">
- * 5. window.location.origin (same-origin when FastAPI serves this UI)
+ * 5. window.location.origin (same-origin only when this UI is served by the API itself)
  *
  * Do not hardcode localhost, production domains, or credentials here.
+ * The public sandbox default lives in runtime-config.js so a separately
+ * hosted frontend does not call its own origin.
  */
 function stripSlash(value) {
   return String(value || "").replace(/\/$/, "");
@@ -26,11 +28,26 @@ function fromViteEnv() {
   return "";
 }
 
+function injectedApiBase() {
+  try {
+    if (typeof globalThis !== "undefined" && globalThis.__WAGGY_API_BASE_URL__) {
+      return stripSlash(globalThis.__WAGGY_API_BASE_URL__);
+    }
+  } catch (_err) {
+    /* ignore hosts without globalThis */
+  }
+  if (typeof window !== "undefined" && window.__WAGGY_API_BASE_URL__) {
+    return stripSlash(window.__WAGGY_API_BASE_URL__);
+  }
+  return "";
+}
+
 export function getApiBaseUrl() {
   var params = new URLSearchParams(window.location.search);
   var fromQuery = params.get("api");
   if (fromQuery) return stripSlash(fromQuery);
-  if (window.__WAGGY_API_BASE_URL__) return stripSlash(window.__WAGGY_API_BASE_URL__);
+  var injected = injectedApiBase();
+  if (injected) return injected;
   var fromVite = fromViteEnv();
   if (fromVite) return fromVite;
   var tag = document.querySelector('meta[name="waggy-api-base"]');

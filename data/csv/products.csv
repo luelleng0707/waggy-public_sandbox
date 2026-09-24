@@ -1,0 +1,5 @@
+product_id,name,price,category
+joint_supplement,Joint Supplement,28,supplement
+dental_care,Dental Care,16,dental
+dry_food,Dry Food,42,food
+missing_cat,Unlabeled Chew,9,

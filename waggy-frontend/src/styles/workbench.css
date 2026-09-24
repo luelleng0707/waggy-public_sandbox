@@ -1,5 +1,10 @@
 /* Unified demo workbench — Wagtopia tokens from theme.css. Wider than the phone shell. */
 
+.b2b-app { max-width: 1180px; margin: 0 auto; padding: 0 24px 48px; }
+.b2b-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.b2b-nav button.is-active { outline: 2px solid var(--accent); }
+.b2b-app label { display: block; margin: 8px 0; }
+
 .workbench-body {
   min-height: 100vh;
   margin: 0;

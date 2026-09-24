@@ -2,6 +2,7 @@
 import { bindApiLinks, getApiBaseUrl } from "./api/config.js";
 import { createWaggyClient } from "./api/client.js";
 import { DEMO_DOG_DOLLY, WORKBENCH_EXAMPLE_REQUEST as DEMO_EXAMPLE_REQUEST } from "./demo/dogs.js";
+import { mountB2bHub } from "./b2b/hub.js";
 
   "use strict";
 
@@ -159,6 +160,27 @@ import { DEMO_DOG_DOLLY, WORKBENCH_EXAMPLE_REQUEST as DEMO_EXAMPLE_REQUEST } fro
     currentDogId = id || "";
     var el = $("dog-id");
     if (el) el.value = currentDogId;
+    syncEvidenceReportLink(currentDogId);
+  }
+
+  function syncEvidenceReportLink(dogId) {
+    var wrap = $("evidence-report-link");
+    var anchor = $("evidence-report-anchor");
+    var list = $("care-history-list");
+    if (list) list.setAttribute("data-dog-id", dogId || "");
+    if (!wrap || !anchor) return;
+    if (!dogId) {
+      wrap.hidden = true;
+      anchor.setAttribute("data-dog-id", "");
+      anchor.removeAttribute("href");
+      return;
+    }
+    anchor.setAttribute("data-dog-id", dogId);
+    anchor.setAttribute(
+      "href",
+      getApiBaseUrl() + "/evidence-report?dog_id=" + encodeURIComponent(dogId)
+    );
+    wrap.hidden = false;
   }
 
   function dogPayloadFromForm() {
@@ -1568,6 +1590,7 @@ import { DEMO_DOG_DOLLY, WORKBENCH_EXAMPLE_REQUEST as DEMO_EXAMPLE_REQUEST } fro
     });
   }
 
+  mountB2bHub();
   window.WagtopiaWorkbench = {
     getAnalysis: function () { return currentAnalysis; },
     getRole: function () { return currentRole; },

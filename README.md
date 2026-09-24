@@ -10,7 +10,7 @@ This repository shows what a partner could build around Waggy: a client-facing p
 >
 > This repository demonstrates the intended client experience and API integration boundary for Waggy. It is designed for demonstrations, client discussions, architecture review, and experimentation. It is not the production Waggy backend and does not contain Waggy's private scientific or decision infrastructure.
 >
-> **The Waggy API server is not included in this repository.** The frontend loads and can be inspected without a backend. Analysis, saved dogs, recompute, and Ask Waggy require an external Waggy API. No public sandbox API is running from this repo today.
+> **The Waggy API server is not included in this repository.** This frontend is a presentation client. By default it calls the verified external API at `https://waggy-production.up.railway.app`. It does not run analysis, optimization, or evidence selection itself.
 
 ---
 
@@ -477,7 +477,7 @@ npm start
 
 Open [http://127.0.0.1:5173](http://127.0.0.1:5173).
 
-The workbench loads without a backend. Dolly is pre-filled. Run Analysis, Save / Load dog, Recompute, and Ask Waggy call the configured Waggy API and fail cleanly if none is available.
+The workbench loads with Dolly pre-filled. Run Analysis, Save / Load dog, Recompute, and Ask Waggy call the configured Waggy API. The default base is the verified production API in `src/api/runtime-config.js`.
 
 `npm start` is `node scripts/serve.mjs`. Equivalent:
 
@@ -496,36 +496,39 @@ node --test tests/api-client.test.mjs tests/isolation.test.mjs
 
 Google Fonts load from a public CDN for the existing visual language. The workbench still runs if that CDN is blocked.
 
-Independent static hosting does not rewrite `/business` or `/developer` to the SPA. Use `?role=business` or `?role=developer` (or the in-page tabs).
+`npm start` serves `/`, `/demo`, `/classic`, `/business`, and `/developer` as this same workbench. `?role=` selects a projection and does not call the API.
 
 ---
 
 ## Pointing at a Waggy API
 
-When this UI is hosted **separately** from the API, set a public base URL (not a secret):
+The public sandbox default is the verified production API:
+
+`https://waggy-production.up.railway.app`
+
+That value lives in `waggy-frontend/src/api/runtime-config.js` as `globalThis.__WAGGY_API_BASE_URL__`. It is configuration, not a per-call URL. Override it only when you intend to point at a different API:
 
 ```bash
-# environment used by the static server
-set WAGGY_API_BASE_URL=http://localhost:8000
+set WAGGY_API_BASE_URL=https://waggy-production.up.railway.app
 ```
 
 Or a query parameter:
 
 ```
-http://127.0.0.1:5173/?api=http://localhost:8000
+http://127.0.0.1:5173/?api=https://waggy-production.up.railway.app
 ```
 
 Resolution order in the client:
 
 1. `?api=` query parameter  
-2. `window.__WAGGY_API_BASE_URL__` (injected by the static server)  
+2. `globalThis.__WAGGY_API_BASE_URL__` (runtime-config.js, or the static server when the env var is set)  
 3. `VITE_WAGGY_API_BASE_URL` when a bundler defines it  
 4. `<meta name="waggy-api-base">`  
-5. same origin (`window.location.origin`)
+5. same origin (`window.location.origin`) — only if no base was configured
 
 See `waggy-frontend/.env.example`. Do not put Gemini keys, database credentials, or API secrets in this project.
 
-When the UI is served by the Waggy API itself, same-origin is enough; `WAGGY_API_BASE_URL` is not required.
+When the UI is served by the Waggy API itself and runtime config is empty, same-origin is enough. This public sandbox sets a base so a separately hosted frontend does not call itself.
 
 If the API is on a different origin, that API must allow browser CORS. This frontend does not embed CORS or authentication configuration.
 
